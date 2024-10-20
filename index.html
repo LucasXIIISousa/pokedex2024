@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <div id="navbar">
+            <div id="pokedex-topleft">
+                <div id="light-1"></div>
+                <div id="light-2"></div>
+                <div id="light-3"></div>
+                <div id="light-4"></div>
+            </div>
+            <div>
+                <div class="search-bar">
+                    <input type="text" placeholder="Procure seu pokémon" v-model="searchText">
+                </div>     
+            </div>
+            <div class="switch-container">
+                <label class="switch">
+                    <input type="checkbox" v-model="isSwitchOn" @change="toggleCompareMode">
+                    <span class="slider">
+                        <span class="slider-text">{{ isSwitchOn ? 'Comparando' : 'Standard' }}</span>
+                    </span>
+                </label>
+            </div>   
+        </div>
+
+        <div v-if="showCompareModal" class="comparison-container">
+            <div v-for="pokemon in comparedPokemons" :key="pokemon.id" class="comparison-card">
+                <div class="comparison-pokemon-card">
+                    <p class="comparison-pokemon-name">{{ pokemon.name }}</p>
+                    <div class="comparison-pokemon-img">
+                        <img :src="pokemon.sprites.other.showdown.front_default">
+                    </div>
+                    <div class="comparison-pokemon-types">
+                        <p class="comparison-pokemon-type" v-for="type in pokemon.types" :class="getTypeClass(type.type.name)">
+                            {{ type.type.name }}
+                        </p>
+                    </div>
+                </div>
+                <div class="comparison-pokemon-stats">
+                    <div class="stat-bar">
+                        <p>HP</p>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{ width: getStatPercentage(getStat(pokemon.stats, 'hp')) + '%' }"></div>
+                        </div>
+                        <span class="stat-text">{{ getStat(pokemon.stats, 'hp') }} / 255</span>
+                    </div>
+                    <div class="stat-bar">
+                        <p>Atk</p>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{ width: getStatPercentage(getStat(pokemon.stats, 'attack')) + '%' }"></div>
+                        </div>
+                        <span class="stat-text">{{ getStat(pokemon.stats, 'attack') }} / 255</span>
+                    </div>
+                    <div class="stat-bar">
+                        <p>Def</p>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{ width: getStatPercentage(getStat(pokemon.stats, 'defense')) + '%' }"></div>
+                        </div>
+                        <span class="stat-text">{{ getStat(pokemon.stats, 'defense') }} / 255</span>
+                    </div>
+                    <div class="stat-bar">
+                        <p>Sp.Atk</p>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{ width: getStatPercentage(getStat(pokemon.stats, 'special-attack')) + '%' }"></div>
+                        </div>
+                        <span class="stat-text">{{ getStat(pokemon.stats, 'special-attack') }} / 255</span>
+                    </div>
+                    <div class="stat-bar">
+                        <p>Sp.Def</p>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{ width: getStatPercentage(getStat(pokemon.stats, 'special-defense')) + '%' }"></div>
+                        </div>
+                        <span class="stat-text">{{ getStat(pokemon.stats, 'special-defense') }} / 255</span>
+                    </div>
+                    <div class="stat-bar">
+                        <p>Speed</p>
+                        <div class="progress">
+                            <div class="progress-bar" :style="{ width: getStatPercentage(getStat(pokemon.stats, 'speed')) + '%' }"></div>
+                        </div>
+                        <span class="stat-text">{{ getStat(pokemon.stats, 'speed') }} / 255</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div class="pokemon-container">
+            <ul>
+                <li v-for="pokemon in filteredPokemons" :key="pokemon.id"
+                    :class="{ selected: selectedPokemon1 === pokemon || selectedPokemon2 === pokemon }"
+                    @click="selectPokemon(pokemon)"
+                    :style="pokemon.types.length > 1 
+                            ? { background: 'linear-gradient(90deg, ' + getTypeColor(pokemon.types[0].type.name) + ' 40%, ' + getTypeColor(pokemon.types[1].type.name) + ' 60%)' } 
+                            : { backgroundColor: getTypeColor(pokemon.types[0].type.name) }">
+                    <div class="pokemon-card">
+                        <p class="pokemon-name">{{ pokemon.name }}</p>
+                        <div class="pokemon-img">
+                            <img :src="pokemon.sprites.other.showdown.front_default">
+                        </div>
+                        <div class="pokemon-types">
+                            <p class="pokemon-type" v-for="type in pokemon.types" :class="getTypeClass(type.type.name)">
+                                {{ type.type.name }}
+                            </p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="loading">
+            <h1 v-if="loading">Loading...</h1>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="index.js"></script>
